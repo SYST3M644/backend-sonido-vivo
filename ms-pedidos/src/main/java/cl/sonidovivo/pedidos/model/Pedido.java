@@ -34,6 +34,9 @@ public class Pedido {
     @Column(nullable = false, length = 20)
     private String estado = "en preparacion";
 
+    @Column(length = 150)
+    private String correo;
+
     @PrePersist
     protected void asignarFecha() {
         if (this.fecha == null) {

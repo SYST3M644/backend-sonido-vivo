@@ -1,0 +1,2 @@
+ALTER TABLE pedido
+ADD COLUMN correo VARCHAR(150) NULL;
