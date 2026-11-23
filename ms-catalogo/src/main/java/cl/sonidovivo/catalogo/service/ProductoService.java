@@ -29,6 +29,19 @@ public class ProductoService {
         return repository.save(producto);
     }
 
+    public Producto descontarStock(Long id, Integer cantidad) {
+        Producto producto = buscar(id);
+
+        int quedan = producto.getStock() - cantidad;
+
+        if (quedan < 0) {
+            quedan = 0;
+        }
+
+        producto.setStock(quedan);
+        return repository.save(producto);
+    }
+
     public Producto actualizarStock(Long id, Integer cantidad) {
         Producto producto = buscar(id);
         producto.setStock(cantidad);

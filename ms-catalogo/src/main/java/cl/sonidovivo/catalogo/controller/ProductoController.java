@@ -40,6 +40,12 @@ public class ProductoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(guardado);
     }
 
+    @PutMapping("/{id}/descontar")
+    public ResponseEntity<Producto> descontarStock(@PathVariable Long id, @RequestBody Producto producto) {
+        Producto actualizado = service.descontarStock(id, producto.getStock());
+        return ResponseEntity.ok(actualizado);
+    }
+
     @PutMapping("/{id}/stock")
     public ResponseEntity<Producto> actualizarStock(@PathVariable Long id, @RequestBody Producto producto) {
         Producto actualizado = service.actualizarStock(id, producto.getStock());
