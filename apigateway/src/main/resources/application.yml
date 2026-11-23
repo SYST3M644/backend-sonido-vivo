@@ -1,0 +1,61 @@
+server:
+  port: 6464
+
+app:
+  jwt:
+    secreto: ${JWT_SECRET:sonido-vivo-clave-secreta-para-firmar-tokens-2026}
+
+spring:
+  application:
+    name: apigateway
+  cloud:
+    compatibility-verifier:
+      enabled: false
+    gateway:
+      server:
+        webflux:
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOrigins: "http://localhost:5173"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - OPTIONS
+                allowedHeaders: "*"
+          routes:
+            - id: ruta-ms-usuarios
+              uri: lb://usuarios
+              predicates:
+                - Path=/api/usuarios,/api/usuarios/**,/api/auth/**
+
+            - id: ruta-ms-catalogo
+              uri: lb://catalogo
+              predicates:
+                - Path=/api/productos,/api/productos/**,/api/stock,/api/stock/**
+
+            - id: ruta-ms-pedidos
+              uri: lb://pedidos
+              predicates:
+                - Path=/api/pedidos,/api/pedidos/**
+
+            - id: ruta-ms-contacto
+              uri: lb://contacto
+              predicates:
+                - Path=/api/contactos,/api/contactos/**
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    instance-id: apigateway:${server.port}
+
+logging:
+  level:
+    '[org.springframework.cloud.gateway]': INFO
