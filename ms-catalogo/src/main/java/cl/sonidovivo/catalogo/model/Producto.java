@@ -30,4 +30,7 @@ public class Producto {
 
     @Column(nullable = false)
     private Integer stock = 0;
+
+    @Column(nullable = false, length = 30)
+    private String categoria = "Accesorios";
 }
