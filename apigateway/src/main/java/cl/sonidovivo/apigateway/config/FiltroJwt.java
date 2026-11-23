@@ -29,6 +29,7 @@ public class FiltroJwt implements GlobalFilter, Ordered {
     );
 
     private static final String CONTACTO = "/api/contactos";
+    private static final String PEDIDOS = "/api/pedidos";
 
     private final SecretKey clave;
 
@@ -75,6 +76,10 @@ public class FiltroJwt implements GlobalFilter, Ordered {
         }
 
         if (HttpMethod.POST.equals(metodo) && CONTACTO.equals(ruta)) {
+            return true;
+        }
+
+        if (HttpMethod.POST.equals(metodo) && PEDIDOS.equals(ruta)) {
             return true;
         }
 
