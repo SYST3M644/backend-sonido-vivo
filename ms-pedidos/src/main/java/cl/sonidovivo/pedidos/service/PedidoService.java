@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import cl.sonidovivo.pedidos.model.Pedido;
+import cl.sonidovivo.pedidos.model.PedidoItem;
 import cl.sonidovivo.pedidos.repository.PedidoRepository;
 
 @Service
@@ -51,6 +52,12 @@ public class PedidoService {
     public Pedido crear(Pedido pedido) {
         pedido.setId(null);
         pedido.setEstado("en preparacion");
+
+        for (PedidoItem item : pedido.getItems()) {
+            item.setId(null);
+            item.setPedido(pedido);
+        }
+
         return repository.save(pedido);
     }
 
