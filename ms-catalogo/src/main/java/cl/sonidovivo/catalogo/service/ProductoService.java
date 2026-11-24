@@ -2,7 +2,9 @@ package cl.sonidovivo.catalogo.service;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import cl.sonidovivo.catalogo.model.Producto;
 import cl.sonidovivo.catalogo.repository.ProductoRepository;
@@ -21,7 +23,8 @@ public class ProductoService {
 
     public Producto buscar(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado con id: " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Producto no encontrado con id: " + id));
     }
 
     public Producto guardar(Producto producto) {

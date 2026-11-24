@@ -2,7 +2,9 @@ package cl.sonidovivo.contacto.service;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import cl.sonidovivo.contacto.model.Mensajeria;
 import cl.sonidovivo.contacto.repository.MensajeriaRepository;
@@ -25,14 +27,20 @@ public class MensajeriaService {
         return repository.findAll();
     }
 
-   public Mensajeria actualizarEstado(Long id) {
-    Mensajeria contacto = repository.findById(id).orElseThrow(() -> new RuntimeException("Contacto no encontrado con id: " + id));
-    contacto.setEstado("RECIBIDO");
-    return repository.save(contacto);
-}
+    public Mensajeria buscar(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Mensaje no encontrado con id: " + id));
+    }
+
+    public Mensajeria actualizarEstado(Long id) {
+        Mensajeria contacto = buscar(id);
+        contacto.setEstado("RECIBIDO");
+        return repository.save(contacto);
+    }
 
     public void eliminar(Long id) {
-        Mensajeria contacto = repository.findById(id).orElseThrow(() -> new RuntimeException("Contacto no encontrado con id: " + id));
+        Mensajeria contacto = buscar(id);
         repository.delete(contacto);
     }
 }
