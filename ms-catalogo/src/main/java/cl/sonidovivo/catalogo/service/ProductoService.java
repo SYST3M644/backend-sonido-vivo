@@ -35,13 +35,17 @@ public class ProductoService {
     public Producto descontarStock(Long id, Integer cantidad) {
         Producto producto = buscar(id);
 
-        int quedan = producto.getStock() - cantidad;
-
-        if (quedan < 0) {
-            quedan = 0;
+        if (cantidad == null || cantidad <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La cantidad debe ser mayor a 0");
         }
 
-        producto.setStock(quedan);
+        // No se puede vender mas de lo que hay en bodega
+        if (cantidad > producto.getStock()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Solo quedan " + producto.getStock() + " unidades de " + producto.getTitulo());
+        }
+
+        producto.setStock(producto.getStock() - cantidad);
         return repository.save(producto);
     }
 
