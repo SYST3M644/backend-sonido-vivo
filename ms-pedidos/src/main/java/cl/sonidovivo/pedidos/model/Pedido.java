@@ -41,6 +41,10 @@ public class Pedido {
     @Column(length = 150)
     private String correo;
 
+    // Forma de pago, por ejemplo "Tarjeta terminada en 1111"
+    @Column(length = 60)
+    private String pago;
+
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PedidoItem> items = new ArrayList<>();
 
