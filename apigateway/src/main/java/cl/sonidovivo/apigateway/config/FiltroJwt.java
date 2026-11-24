@@ -83,6 +83,11 @@ public class FiltroJwt implements GlobalFilter, Ordered {
             return true;
         }
 
+        // Al confirmar una compra se descuenta el stock, y el invitado no tiene token
+        if (HttpMethod.PUT.equals(metodo) && ruta.startsWith("/api/productos/") && ruta.endsWith("/descontar")) {
+            return true;
+        }
+
         return HttpMethod.GET.equals(metodo) && ruta.startsWith("/api/productos");
     }
 
