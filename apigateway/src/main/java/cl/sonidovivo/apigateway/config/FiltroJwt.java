@@ -1,5 +1,6 @@
 package cl.sonidovivo.apigateway.config;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -51,16 +52,78 @@ public class FiltroJwt implements GlobalFilter, Ordered {
             return rechazar(intercambio);
         }
 
+        Claims datos;
+
         try {
-            Jwts.parser()
+            datos = Jwts.parser()
                     .verifyWith(clave)
                     .build()
-                    .parseSignedClaims(cabecera.substring(PREFIJO.length()));
+                    .parseSignedClaims(cabecera.substring(PREFIJO.length()))
+                    .getPayload();
         } catch (JwtException | IllegalArgumentException e) {
             return rechazar(intercambio);
         }
 
+        // El token es valido: ahora se revisa si su rol puede usar esta ruta
+        String rol = datos.get("rol", String.class);
+        String nombre = datos.get("nombre", String.class);
+
+        if (!permitido(peticion, rol, nombre)) {
+            return prohibir(intercambio);
+        }
+
         return cadena.filter(intercambio);
+    }
+
+    // Reglas de acceso por rol (cliente, vendedor, administrador)
+    private boolean permitido(ServerHttpRequest peticion, String rol, String nombre) {
+        String ruta = peticion.getURI().getPath();
+        HttpMethod metodo = peticion.getMethod();
+
+        boolean esAdministrador = "administrador".equals(rol);
+        boolean esVendedor = "vendedor".equals(rol);
+        boolean atiendeLaTienda = esAdministrador || esVendedor;
+
+        // Usuarios y mensajes de contacto: solo el administrador
+        if (ruta.startsWith("/api/usuarios") || ruta.startsWith(CONTACTO)) {
+            return esAdministrador;
+        }
+
+        // Productos: crear y cambiar stock lo hace la tienda, borrar solo el administrador
+        if (ruta.startsWith("/api/productos")) {
+            if (HttpMethod.DELETE.equals(metodo)) {
+                return esAdministrador;
+            }
+
+            return atiendeLaTienda;
+        }
+
+        if (ruta.startsWith(PEDIDOS)) {
+            if (HttpMethod.DELETE.equals(metodo)) {
+                return esAdministrador;
+            }
+
+            if (HttpMethod.PUT.equals(metodo)) {
+                return atiendeLaTienda;
+            }
+
+            // Un cliente solo puede ver sus propios pedidos
+            String cliente = peticion.getQueryParams().getFirst("cliente");
+
+            if (cliente != null) {
+                return atiendeLaTienda || cliente.equals(nombre);
+            }
+
+            // La lista completa de pedidos es solo para la tienda
+            if (ruta.equals(PEDIDOS)) {
+                return atiendeLaTienda;
+            }
+
+            return true;
+        }
+
+        // Cualquier usuario con sesion: por ejemplo renovar su token
+        return true;
     }
 
     private boolean libre(ServerHttpRequest peticion) {
@@ -91,6 +154,13 @@ public class FiltroJwt implements GlobalFilter, Ordered {
         return HttpMethod.GET.equals(metodo) && ruta.startsWith("/api/productos");
     }
 
+    // 403: el token es valido pero el rol no tiene permiso
+    private Mono<Void> prohibir(ServerWebExchange intercambio) {
+        intercambio.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+        return intercambio.getResponse().setComplete();
+    }
+
+    // 401: no hay token o no es valido
     private Mono<Void> rechazar(ServerWebExchange intercambio) {
         intercambio.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
         return intercambio.getResponse().setComplete();
