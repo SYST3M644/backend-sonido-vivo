@@ -8,9 +8,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
@@ -157,14 +159,23 @@ public class FiltroJwt implements GlobalFilter, Ordered {
 
     // 403: el token es valido pero el rol no tiene permiso
     private Mono<Void> prohibir(ServerWebExchange intercambio) {
-        intercambio.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
-        return intercambio.getResponse().setComplete();
+        return responder(intercambio, HttpStatus.FORBIDDEN, "No tienes permiso para usar esta ruta");
     }
 
     // 401: no hay token o no es valido
     private Mono<Void> rechazar(ServerWebExchange intercambio) {
-        intercambio.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-        return intercambio.getResponse().setComplete();
+        return responder(intercambio, HttpStatus.UNAUTHORIZED, "Debes iniciar sesion");
+    }
+
+    // Responde el error en JSON, igual que los microservicios
+    private Mono<Void> responder(ServerWebExchange intercambio, HttpStatus estado, String mensaje) {
+        intercambio.getResponse().setStatusCode(estado);
+        intercambio.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+        String json = "{\"status\": " + estado.value() + ", \"message\": \"" + mensaje + "\"}";
+        DataBuffer cuerpo = intercambio.getResponse().bufferFactory().wrap(json.getBytes(StandardCharsets.UTF_8));
+
+        return intercambio.getResponse().writeWith(Mono.just(cuerpo));
     }
 
     @Override
