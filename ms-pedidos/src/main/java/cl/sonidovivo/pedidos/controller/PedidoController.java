@@ -15,8 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cl.sonidovivo.pedidos.model.Pedido;
 import cl.sonidovivo.pedidos.service.PedidoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
+@Tag(name = "Pedidos", description = "Pedidos de la tienda")
 @RequestMapping("api/pedidos")
 public class PedidoController {
     private final PedidoService service;
@@ -25,6 +28,7 @@ public class PedidoController {
         this.service = service;
     }
 
+    @Operation(summary = "Listar pedidos", description = "Sin filtros devuelve todos (vendedor o administrador). Con ?cliente= devuelve los de ese cliente y con ?mes=AAAA-MM los de ese mes.")
     @GetMapping
     public List<Pedido> listar(@RequestParam(required = false) String cliente,
                                @RequestParam(required = false) String mes) {
@@ -39,17 +43,20 @@ public class PedidoController {
         return service.listar();
     }
 
+    @Operation(summary = "Buscar un pedido", description = "Devuelve un pedido con sus productos.")
     @GetMapping("/{id}")
     public ResponseEntity<Pedido> buscar(@PathVariable Long id) {
         return ResponseEntity.ok(service.buscar(id));
     }
 
+    @Operation(summary = "Crear pedido", description = "Registra una compra. Es pública para que también compren los invitados.")
     @PostMapping
     public ResponseEntity<Pedido> crear(@RequestBody Pedido pedido) {
         Pedido creado = service.crear(pedido);
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
 
+    @Operation(summary = "Cambiar estado", description = "Avanza el pedido: en preparacion, despachado o entregado. Solo vendedor o administrador.")
     @PutMapping("/{id}/estado")
     public ResponseEntity<Pedido> cambiarEstado(@PathVariable Long id, @RequestBody Pedido pedido) {
         return ResponseEntity.ok(service.cambiarEstado(id, pedido.getEstado()));

@@ -11,8 +11,11 @@ import cl.sonidovivo.usuarios.dto.LoginResponse;
 import cl.sonidovivo.usuarios.model.Usuario;
 import cl.sonidovivo.usuarios.service.TokenService;
 import cl.sonidovivo.usuarios.service.UsuarioService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
+@Tag(name = "Autenticación", description = "Login y tokens JWT")
 @RequestMapping("api/auth")
 public class AuthController {
     private final UsuarioService usuarioService;
@@ -23,6 +26,7 @@ public class AuthController {
         this.tokenService = tokenService;
     }
 
+    @Operation(summary = "Iniciar sesión", description = "Valida correo y contraseña y devuelve los datos del usuario con su token JWT (dura 1 hora).")
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest peticion) {
         Usuario usuario = usuarioService.validarCredenciales(peticion.getCorreo(), peticion.getClave());
