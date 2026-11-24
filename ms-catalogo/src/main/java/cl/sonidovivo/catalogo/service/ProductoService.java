@@ -42,6 +42,11 @@ public class ProductoService {
         return repository.save(producto);
     }
 
+    public void eliminar(Long id) {
+        Producto producto = buscar(id);
+        repository.delete(producto);
+    }
+
     public Producto actualizarStock(Long id, Integer cantidad) {
         Producto producto = buscar(id);
         producto.setStock(cantidad);

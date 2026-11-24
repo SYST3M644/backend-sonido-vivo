@@ -78,6 +78,14 @@ public class UsuarioService {
         return guardado;
     }
 
+    public void eliminar(Long id) {
+        Usuario usuario = repository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Usuario no encontrado con id: " + id));
+
+        repository.delete(usuario);
+    }
+
     public Usuario validarCredenciales(String correo, String clave) {
         Usuario usuario = repository.findByCorreo(correo)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,

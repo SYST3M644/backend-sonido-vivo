@@ -70,4 +70,9 @@ public class PedidoService {
         pedido.setEstado(estado);
         return repository.save(pedido);
     }
+
+    public void eliminar(Long id) {
+        Pedido pedido = buscar(id);
+        repository.delete(pedido);
+    }
 }

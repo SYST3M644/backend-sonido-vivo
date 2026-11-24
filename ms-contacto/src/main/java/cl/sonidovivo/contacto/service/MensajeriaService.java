@@ -31,4 +31,8 @@ public class MensajeriaService {
     return repository.save(contacto);
 }
 
+    public void eliminar(Long id) {
+        Mensajeria contacto = repository.findById(id).orElseThrow(() -> new RuntimeException("Contacto no encontrado con id: " + id));
+        repository.delete(contacto);
+    }
 }
