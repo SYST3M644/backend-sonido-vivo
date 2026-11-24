@@ -50,6 +50,12 @@ public class PedidoService {
     }
 
     public Pedido crear(Pedido pedido) {
+        // Para despachar el pedido se necesita la direccion
+        if ("despacho".equals(pedido.getEntrega())
+                && (pedido.getDireccion() == null || pedido.getDireccion().isBlank())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debe ingresar la direccion de despacho");
+        }
+
         pedido.setId(null);
         pedido.setEstado("en preparacion");
 

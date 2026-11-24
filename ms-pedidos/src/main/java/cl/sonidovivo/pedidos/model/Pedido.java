@@ -45,6 +45,10 @@ public class Pedido {
     @Column(length = 60)
     private String pago;
 
+    // Direccion de envio, solo cuando la entrega es "despacho"
+    @Column(length = 200)
+    private String direccion;
+
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PedidoItem> items = new ArrayList<>();
 

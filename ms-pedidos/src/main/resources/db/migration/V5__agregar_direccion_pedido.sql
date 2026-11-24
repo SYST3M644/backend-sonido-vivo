@@ -1,0 +1,2 @@
+ALTER TABLE pedido
+ADD COLUMN direccion VARCHAR(200) NULL;
