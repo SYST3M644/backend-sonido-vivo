@@ -78,6 +78,36 @@ public class UsuarioService {
         return guardado;
     }
 
+    // Registro desde la tienda: siempre queda como cliente
+    public Usuario registrarCliente(Usuario datos) {
+        if (datos.getNombre() == null || datos.getNombre().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debe ingresar su nombre");
+        }
+
+        if (datos.getCorreo() == null || !datos.getCorreo().contains("@")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ingrese un correo valido");
+        }
+
+        if (datos.getClave() == null || datos.getClave().length() < 8) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La contrasena debe tener al menos 8 caracteres");
+        }
+
+        datos.setRol("cliente");
+        return crear(datos);
+    }
+
+    public Usuario buscarPorCorreo(String correo) {
+        Usuario usuario = repository.findByCorreo(correo)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                        "Usuario no encontrado"));
+
+        if (!usuario.getActivo()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "El usuario esta desactivado");
+        }
+
+        return usuario;
+    }
+
     public void eliminar(Long id) {
         Usuario usuario = repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,

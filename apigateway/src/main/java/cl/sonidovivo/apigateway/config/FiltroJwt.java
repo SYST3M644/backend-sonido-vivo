@@ -26,7 +26,8 @@ public class FiltroJwt implements GlobalFilter, Ordered {
     private static final String PREFIJO = "Bearer ";
 
     private static final List<String> LIBRES = List.of(
-            "/api/auth/login"
+            "/api/auth/login",
+            "/api/auth/registro"
     );
 
     private static final String CONTACTO = "/api/contactos";

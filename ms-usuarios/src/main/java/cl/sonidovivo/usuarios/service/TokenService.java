@@ -9,6 +9,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import cl.sonidovivo.usuarios.model.Usuario;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
@@ -36,5 +40,19 @@ public class TokenService {
                 .expiration(expira)
                 .signWith(clave)
                 .compact();
+    }
+
+    // Revisa la firma y el vencimiento del token y devuelve el correo del usuario
+    public String correoDelToken(String token) {
+        try {
+            return Jwts.parser()
+                    .verifyWith(clave)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .getSubject();
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token no valido o vencido");
+        }
     }
 }

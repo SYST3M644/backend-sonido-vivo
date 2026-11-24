@@ -1,8 +1,10 @@
 package cl.sonidovivo.usuarios.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,6 +32,39 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest peticion) {
         Usuario usuario = usuarioService.validarCredenciales(peticion.getCorreo(), peticion.getClave());
+
+        String token = tokenService.generar(usuario);
+
+        LoginResponse respuesta = new LoginResponse(
+                usuario.getNombre(),
+                usuario.getCorreo(),
+                usuario.getRol(),
+                token);
+
+        return ResponseEntity.ok(respuesta);
+    }
+
+    @Operation(summary = "Registrar cliente", description = "Crea una cuenta nueva con rol cliente y devuelve su token, para que quede con la sesion iniciada.")
+    @PostMapping("/registro")
+    public ResponseEntity<LoginResponse> registrar(@RequestBody Usuario datos) {
+        Usuario usuario = usuarioService.registrarCliente(datos);
+
+        String token = tokenService.generar(usuario);
+
+        LoginResponse respuesta = new LoginResponse(
+                usuario.getNombre(),
+                usuario.getCorreo(),
+                usuario.getRol(),
+                token);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
+    }
+
+    @Operation(summary = "Renovar token", description = "Recibe un token que todavia no vence y entrega uno nuevo con otra hora de duracion.")
+    @PostMapping("/renovar")
+    public ResponseEntity<LoginResponse> renovar(@RequestHeader("Authorization") String cabecera) {
+        String correo = tokenService.correoDelToken(cabecera.replace("Bearer ", ""));
+        Usuario usuario = usuarioService.buscarPorCorreo(correo);
 
         String token = tokenService.generar(usuario);
 
